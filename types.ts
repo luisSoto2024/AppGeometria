@@ -15,13 +15,17 @@ export enum Screen {
   LessonChallengeFinal = 'LESSON_CHALLENGE_FINAL',
   LessonSummary = 'LESSON_SUMMARY',
   Lesson2Observe = 'LESSON2_OBSERVE',
+  Lesson2Conceptualize = 'LESSON2_CONCEPTUALIZE',
   Quiz = 'QUIZ',
   Results = 'RESULTS',
   Profile = 'PROFILE',
-  Progress = 'PROGRESS'
+  Progress = 'PROGRESS',
+  Ranking = 'RANKING'
 }
 
 export interface UserProgress {
+  name: string;
+  email: string;
   xp: number;
   gems: number;
   streak: number;

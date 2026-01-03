@@ -16,10 +16,12 @@ import LessonJustify from './screens/LessonJustify';
 import LessonChallengeFinal from './screens/LessonChallengeFinal';
 import LessonSummary from './screens/LessonSummary';
 import Lesson2Observe from './screens/Lesson2Observe';
+import Lesson2Conceptualize from './screens/Lesson2Conceptualize';
 import Quiz from './screens/Quiz';
 import Results from './screens/Results';
 import Profile from './screens/Profile';
 import ProgressScreen from './screens/Progress';
+import RankingScreen from './screens/Ranking';
 import ChatBot from './components/ChatBot';
 
 const App: React.FC = () => {
@@ -27,15 +29,16 @@ const App: React.FC = () => {
   const [user, setUser] = useState<UserProgress>(() => {
     const saved = localStorage.getItem('gmath_user');
     return saved ? JSON.parse(saved) : {
-      xp: 450,
-      gems: 250,
-      streak: 5,
-      level: 4,
+      name: 'Invitado',
+      email: '',
+      xp: 0,
+      gems: 0,
+      streak: 1,
+      level: 1,
       completedModules: []
     };
   });
 
-  // Persist state
   useEffect(() => {
     localStorage.setItem('gmath_user', JSON.stringify(user));
   }, [user]);
@@ -43,7 +46,7 @@ const App: React.FC = () => {
   const addXP = (amount: number) => {
     setUser(prev => {
       const newXP = prev.xp + amount;
-      const newLevel = Math.floor(newXP / 100); 
+      const newLevel = Math.max(prev.level, Math.floor(newXP / 100) + 1); 
       return { ...prev, xp: newXP, level: newLevel };
     });
   };
@@ -61,6 +64,15 @@ const App: React.FC = () => {
     }));
   };
 
+  const handleLogin = (name: string, email: string) => {
+    setUser(prev => ({ ...prev, name, email }));
+    navigate(Screen.Dashboard);
+  };
+
+  const updateUserName = (newName: string) => {
+    setUser(prev => ({ ...prev, name: newName }));
+  };
+
   const navigate = (screen: Screen) => {
     setCurrentScreen(screen);
     window.scrollTo(0, 0);
@@ -71,9 +83,11 @@ const App: React.FC = () => {
       case Screen.Welcome: 
         return <Welcome onStart={() => navigate(Screen.Login)} onLogin={() => navigate(Screen.Login)} />;
       case Screen.Login: 
-        return <Login onBack={() => navigate(Screen.Welcome)} onLogin={() => navigate(Screen.Dashboard)} />;
+        return <Login onBack={() => navigate(Screen.Welcome)} onLogin={handleLogin} />;
       case Screen.Dashboard: 
         return <Dashboard user={user} navigate={navigate} />;
+      case Screen.Ranking:
+        return <RankingScreen user={user} navigate={navigate} />;
       case Screen.ModuleLessons:
         return (
           <ModuleLessons 
@@ -104,8 +118,13 @@ const App: React.FC = () => {
         return <LessonChallengeFinal user={user} addXP={addXP} onBack={() => navigate(Screen.LessonJustify)} onNext={() => navigate(Screen.LessonSummary)} />;
       case Screen.LessonSummary:
         return <LessonSummary onNext={() => navigate(Screen.Results)} />;
+      
+      // Module 2 Screens
       case Screen.Lesson2Observe:
-        return <Lesson2Observe user={user} onBack={() => navigate(Screen.ModuleLessons)} onNext={() => navigate(Screen.ModuleLessons)} />;
+        return <Lesson2Observe user={user} onBack={() => navigate(Screen.ModuleLessons)} onNext={() => navigate(Screen.Lesson2Conceptualize)} />;
+      case Screen.Lesson2Conceptualize:
+        return <Lesson2Conceptualize onBack={() => navigate(Screen.Lesson2Observe)} onNext={() => { addXP(50); navigate(Screen.ModuleLessons); }} />;
+      
       case Screen.Quiz: 
         return <Quiz user={user} onFinish={(score: number) => { 
           addXP(score * 20); 
@@ -115,7 +134,16 @@ const App: React.FC = () => {
       case Screen.Results: 
         return <Results user={user} onContinue={() => { completeLesson('lesson1'); navigate(Screen.ModuleLessons); }} />;
       case Screen.Profile: 
-        return <Profile user={user} navigate={navigate} />;
+        return <Profile 
+          user={user} 
+          navigate={navigate} 
+          onUpdateName={updateUserName}
+          onLogout={() => {
+            localStorage.removeItem('gmath_user');
+            setUser({ name: 'Invitado', email: '', xp: 0, gems: 0, streak: 1, level: 1, completedModules: [] });
+            navigate(Screen.Welcome);
+          }} 
+        />;
       case Screen.Progress: 
         return <ProgressScreen user={user} navigate={navigate} />;
       default: 
@@ -128,7 +156,7 @@ const App: React.FC = () => {
       <div className="flex-1">
         {renderScreen()}
       </div>
-      {currentScreen !== Screen.Welcome && currentScreen !== Screen.Login && (
+      {currentScreen !== Screen.Welcome && currentScreen !== Screen.Login && currentScreen !== Screen.Ranking && (
         <ChatBot />
       )}
     </div>

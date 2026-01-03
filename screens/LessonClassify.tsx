@@ -2,19 +2,19 @@
 import React, { useState } from 'react';
 import { UserProgress } from '../types';
 
-interface LessonClassifyProps {
-  user: UserProgress;
-  addXP: (amount: number) => void;
-  onBack: () => void;
-  onNext: () => void;
-}
-
 interface Item {
   id: string;
   type: 'figure' | 'property';
   content: React.ReactNode;
   label: string;
   correctCategory: 'triangle' | 'quadrilateral';
+}
+
+interface LessonClassifyProps {
+  user: UserProgress;
+  addXP: (amount: number) => void;
+  onBack: () => void;
+  onNext: () => void;
 }
 
 const LessonClassify: React.FC<LessonClassifyProps> = ({ user, addXP, onBack, onNext }) => {
@@ -44,7 +44,7 @@ const LessonClassify: React.FC<LessonClassifyProps> = ({ user, addXP, onBack, on
       content: (
         <div className="flex flex-col items-center">
           <span className="material-symbols-outlined text-indigo-400 mb-1">functions</span>
-          <p className="text-white text-center font-bold text-xs leading-tight">Suma de ángulos<br/>180°</p>
+          <p className="text-white text-center font-bold text-[10px] leading-tight">Suma de ángulos<br/>180°</p>
         </div>
       )
     },
@@ -63,7 +63,7 @@ const LessonClassify: React.FC<LessonClassifyProps> = ({ user, addXP, onBack, on
       content: (
         <div className="flex flex-col items-center">
           <span className="material-symbols-outlined text-pink-400 mb-1">grid_goldenratio</span>
-          <p className="text-white text-center font-bold text-xs leading-tight">Suma de ángulos<br/>360°</p>
+          <p className="text-white text-center font-bold text-[10px] leading-tight">Suma de ángulos<br/>360°</p>
         </div>
       )
     },
@@ -81,6 +81,24 @@ const LessonClassify: React.FC<LessonClassifyProps> = ({ user, addXP, onBack, on
     setSelectedItemId(null);
   };
 
+  const handleRemoveFromCategory = (id: string) => {
+    if (isVerified) return;
+    setAssignments(prev => ({ ...prev, [id]: null }));
+    setError(false);
+  };
+
+  const handleReset = () => {
+    setAssignments({
+      'fig-a': null,
+      'prop-180': null,
+      'fig-b': null,
+      'prop-360': null,
+    });
+    setSelectedItemId(null);
+    setError(false);
+    setIsVerified(false);
+  };
+
   const handleValidate = () => {
     const allAssigned = Object.values(assignments).every(v => v !== null);
     if (!allAssigned) return;
@@ -93,7 +111,7 @@ const LessonClassify: React.FC<LessonClassifyProps> = ({ user, addXP, onBack, on
       addXP(30);
     } else {
       setError(true);
-      setTimeout(() => setError(false), 2000);
+      // No ocultamos el error automáticamente para que el usuario sepa que falló
     }
   };
 
@@ -114,68 +132,87 @@ const LessonClassify: React.FC<LessonClassifyProps> = ({ user, addXP, onBack, on
         </div>
       </header>
 
-      <div className="flex w-full flex-row items-center justify-center gap-2 py-4">
+      <div className="flex w-full flex-row items-center justify-center gap-2 py-2">
         <div className="h-1.5 w-8 rounded-full bg-primary/40"></div>
         <div className="h-1.5 w-8 rounded-full bg-primary/40"></div>
         <div className="h-1.5 w-8 rounded-full bg-primary shadow-[0_0_10px_rgba(19,236,91,0.5)]"></div>
-        <div className="h-1.5 w-8 rounded-full bg-white/10"></div>
         <div className="h-1.5 w-8 rounded-full bg-white/10"></div>
       </div>
 
       <main className="flex-1 flex flex-col px-5 pb-32 overflow-y-auto">
         <div className="flex flex-col items-center text-center mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold leading-tight mb-2">Clasificación Básica</h1>
-          <p className="text-white/70 text-base font-normal leading-normal max-w-[280px]">
-            Selecciona un elemento y asígnalo a su categoría geométrica.
+          <h1 className="text-2xl font-bold leading-tight mb-2">Clasificación Básica</h1>
+          <p className="text-white/70 text-sm font-normal leading-normal max-w-[280px]">
+            Asigna cada elemento a su categoría. ¡Toca un elemento asignado si quieres corregirlo!
           </p>
         </div>
 
         {/* Categories (Drop Zones) */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          <button 
-            onClick={() => handleAssignToCategory('triangle')}
-            disabled={!selectedItemId}
-            className={`flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-2 py-6 transition-all ${
+        <div className={`grid grid-cols-2 gap-4 mb-8 ${error ? 'animate-shake' : ''}`}>
+          <div 
+            className={`flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-2 py-4 transition-all min-h-[160px] ${
               selectedItemId 
-              ? 'border-primary/60 bg-primary/10 scale-105 shadow-lg shadow-primary/20' 
+              ? 'border-primary/60 bg-primary/10 scale-105 shadow-lg shadow-primary/20 cursor-pointer' 
               : 'border-primary/30 bg-primary/5'
-            }`}
+            } ${error ? 'border-red-500/50' : ''}`}
+            onClick={() => selectedItemId && handleAssignToCategory('triangle')}
           >
-            <div className="rounded-full bg-primary/20 p-3 text-primary">
-              <span className="material-symbols-outlined filled" style={{ fontSize: '28px' }}>change_history</span>
+            <div className="rounded-full bg-primary/20 p-2 text-primary">
+              <span className="material-symbols-outlined filled" style={{ fontSize: '24px' }}>change_history</span>
             </div>
-            <p className="text-primary font-bold text-sm text-center leading-tight">Triángulos</p>
-            <div className="flex flex-wrap justify-center gap-1 mt-2">
+            <p className="text-primary font-bold text-[10px] uppercase tracking-tighter">Triángulos</p>
+            <div className="flex flex-wrap justify-center gap-2 mt-1">
               {triangleItems.map(it => (
-                <div key={it.id} className="size-8 scale-75 opacity-80">{it.content}</div>
+                <button 
+                  key={it.id} 
+                  onClick={(e) => { e.stopPropagation(); handleRemoveFromCategory(it.id); }}
+                  className="size-10 scale-90 opacity-90 hover:scale-110 transition-transform relative group"
+                >
+                  {it.content}
+                  {!isVerified && (
+                    <div className="absolute -top-1 -right-1 bg-red-500 rounded-full size-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="material-symbols-outlined text-[10px] text-white">close</span>
+                    </div>
+                  )}
+                </button>
               ))}
             </div>
-          </button>
+          </div>
 
-          <button 
-            onClick={() => handleAssignToCategory('quadrilateral')}
-            disabled={!selectedItemId}
-            className={`flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-2 py-6 transition-all ${
+          <div 
+            className={`flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-2 py-4 transition-all min-h-[160px] ${
               selectedItemId 
-              ? 'border-white/40 bg-white/10 scale-105 shadow-lg' 
+              ? 'border-white/40 bg-white/10 scale-105 shadow-lg cursor-pointer' 
               : 'border-white/20 bg-white/5'
-            }`}
+            } ${error ? 'border-red-500/50' : ''}`}
+            onClick={() => selectedItemId && handleAssignToCategory('quadrilateral')}
           >
-            <div className="rounded-full bg-white/10 p-3 text-white/60">
-              <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>crop_square</span>
+            <div className="rounded-full bg-white/10 p-2 text-white/60">
+              <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>crop_square</span>
             </div>
-            <p className="text-white/60 font-bold text-sm text-center leading-tight">Cuadriláteros</p>
-            <div className="flex flex-wrap justify-center gap-1 mt-2">
+            <p className="text-white/60 font-bold text-[10px] uppercase tracking-tighter">Cuadriláteros</p>
+            <div className="flex flex-wrap justify-center gap-2 mt-1">
               {quadItems.map(it => (
-                <div key={it.id} className="size-8 scale-75 opacity-80">{it.content}</div>
+                <button 
+                  key={it.id} 
+                  onClick={(e) => { e.stopPropagation(); handleRemoveFromCategory(it.id); }}
+                  className="size-10 scale-90 opacity-90 hover:scale-110 transition-transform relative group"
+                >
+                  {it.content}
+                  {!isVerified && (
+                    <div className="absolute -top-1 -right-1 bg-red-500 rounded-full size-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="material-symbols-outlined text-[10px] text-white">close</span>
+                    </div>
+                  )}
+                </button>
               ))}
             </div>
-          </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-4 mb-4">
           <div className="h-px flex-1 bg-white/10"></div>
-          <span className="text-xs font-bold uppercase tracking-wider text-white/40">Elementos Disponibles</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">Elementos Disponibles</span>
           <div className="h-px flex-1 bg-white/10"></div>
         </div>
 
@@ -192,22 +229,36 @@ const LessonClassify: React.FC<LessonClassifyProps> = ({ user, addXP, onBack, on
                   : 'ring-white/10 hover:ring-white/30'
                 }`}
               >
-                <div className="h-16 w-full flex items-center justify-center mb-2">
+                <div className="h-12 w-full flex items-center justify-center mb-1">
                   {item.content}
                 </div>
-                <span className="text-[10px] text-white/50 font-medium uppercase tracking-widest">{item.label}</span>
+                <span className="text-[9px] text-white/50 font-medium uppercase tracking-widest">{item.label}</span>
                 {selectedItemId === item.id && (
-                  <div className="absolute -top-2 -right-2 size-6 rounded-full bg-primary text-black flex items-center justify-center shadow-lg">
+                  <div className="absolute -top-2 -right-2 size-6 rounded-full bg-primary text-black flex items-center justify-center shadow-lg animate-bounce">
                     <span className="material-symbols-outlined text-[16px] font-bold">touch_app</span>
                   </div>
                 )}
               </button>
             ))
           ) : (
-            <div className="col-span-2 flex flex-col items-center justify-center py-8 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
-              <span className="material-symbols-outlined text-primary text-4xl mb-2">done_all</span>
-              <p className="text-sm text-white/40">Todos los elementos asignados</p>
-              {error && <p className="text-red-400 text-xs font-bold mt-2 animate-bounce">¡Algunas clasificaciones son incorrectas!</p>}
+            <div className="col-span-2 flex flex-col items-center justify-center py-6 text-center bg-white/5 rounded-2xl border border-dashed border-white/10 animate-in fade-in">
+              <span className={`material-symbols-outlined text-4xl mb-2 ${isVerified ? 'text-primary' : 'text-white/20'}`}>
+                {isVerified ? 'stars' : 'ads_click'}
+              </span>
+              <p className="text-xs text-white/40">
+                {isVerified ? '¡Perfecto!' : 'Todos los elementos están ubicados'}
+              </p>
+              {error && (
+                <div className="mt-3 flex flex-col items-center gap-2">
+                  <p className="text-red-400 text-xs font-bold uppercase tracking-tighter">Hay errores en la clasificación</p>
+                  <button 
+                    onClick={handleReset}
+                    className="text-[10px] font-bold text-white bg-white/10 px-3 py-1 rounded-full border border-white/10 hover:bg-white/20 transition-all"
+                  >
+                    REINICIAR TODO
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -233,6 +284,17 @@ const LessonClassify: React.FC<LessonClassifyProps> = ({ user, addXP, onBack, on
           </button>
         )}
       </div>
+
+      <style>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+        .animate-shake {
+          animation: shake 0.4s ease-in-out 0s 2;
+        }
+      `}</style>
     </div>
   );
 };

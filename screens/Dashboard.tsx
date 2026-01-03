@@ -8,6 +8,8 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ user, navigate }) => {
+  const isModule1Complete = user.completedModules.includes('lesson1');
+
   return (
     <div className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased selection:bg-primary selection:text-background-dark pb-24 min-h-screen">
       <header className="sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-white/5 pt-4 pb-2 px-4 transition-all duration-300">
@@ -15,26 +17,27 @@ const Dashboard: React.FC<DashboardProps> = ({ user, navigate }) => {
           <div className="flex items-center gap-3">
             <div className="relative group cursor-pointer" onClick={() => navigate(Screen.Profile)}>
               <div 
-                className="bg-center bg-no-repeat bg-cover rounded-full h-12 w-12 ring-2 ring-primary ring-offset-2 ring-offset-background-dark" 
-                style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuB6nuZ7BaJkfoG0aiLE0K9aNu8X63WJzpPPqoDFuMHO7SoBfEVVi2XsUlRdb59ZP17VbXS2BAFTep4e9dnnypYHRb1PBLo2Jgx4hk4woXvFApyiFZOQMLrJep0P9KmStUsjziy0VA7f_I93NLV5vaL4Trvoib_ypWIwdkspihWm8tc7VNyjCDb6xQxVz9vZ42H7HL5fKSDs2G3aFTRIxXgI65KI84Nf2QodW9ef1tuQA5k6T6gtyGSxmzlupNqmg9t4G8neyfjjjMs")'}}
-              ></div>
+                className="bg-center bg-no-repeat bg-cover rounded-full h-12 w-12 ring-2 ring-primary ring-offset-2 ring-offset-background-dark flex items-center justify-center bg-surface-highlight"
+              >
+                <span className="text-lg font-bold text-primary">{user.name.charAt(0).toUpperCase()}</span>
+              </div>
               <div className="absolute bottom-0 right-0 h-4 w-4 bg-primary rounded-full border-2 border-background-dark flex items-center justify-center">
-                <span className="text-[8px] font-bold text-background-dark">5</span>
+                <span className="text-[8px] font-bold text-background-dark">{user.level}</span>
               </div>
             </div>
             <div className="flex flex-col">
-              <h1 className="text-lg font-bold leading-tight tracking-tight">Hola, Mateo!</h1>
-              <p className="text-text-secondary text-xs font-normal">Explorador Geométrico</p>
+              <h1 className="text-lg font-bold leading-tight tracking-tight">¡Hola, {user.name}!</h1>
+              <p className="text-text-secondary text-xs font-normal">Explorador Nivel {user.level}</p>
             </div>
           </div>
-          <button className="relative p-2 rounded-full hover:bg-surface-highlight transition-colors">
-            <span className="material-symbols-outlined text-text-secondary">notifications</span>
-            <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full animate-pulse"></span>
+          <button className="relative p-2 rounded-full hover:bg-surface-highlight transition-colors" onClick={() => navigate(Screen.Ranking)}>
+            <span className="material-symbols-outlined text-text-secondary">leaderboard</span>
+            <span className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full animate-pulse"></span>
           </button>
         </div>
       </header>
 
-      <main className="flex flex-col gap-6 p-4 max-w-md mx-auto">
+      <main className="flex-1 overflow-y-auto flex flex-col gap-6 p-4 max-w-md mx-auto">
         <section className="grid grid-cols-2 gap-3 w-full">
           <div className="flex flex-col gap-1 rounded-2xl p-4 bg-surface-highlight border border-white/5 shadow-sm relative overflow-hidden group">
             <div className="absolute -right-4 -top-4 bg-orange-500/10 h-20 w-20 rounded-full group-hover:bg-orange-500/20 transition-all"></div>
@@ -47,17 +50,16 @@ const Dashboard: React.FC<DashboardProps> = ({ user, navigate }) => {
           <div className="flex flex-col gap-1 rounded-2xl p-4 bg-surface-highlight border border-white/5 shadow-sm relative overflow-hidden group">
             <div className="absolute -right-4 -top-4 bg-blue-500/10 h-20 w-20 rounded-full group-hover:bg-blue-500/20 transition-all"></div>
             <div className="flex items-center gap-2 z-10">
-              <span className="material-symbols-outlined text-blue-400 text-[20px]" style={{fontVariationSettings: "'FILL' 1"}}>diamond</span>
-              <p className="text-text-secondary text-xs font-medium uppercase tracking-wider">Gemas</p>
+              <span className="material-symbols-outlined text-blue-400 text-[20px]" style={{fontVariationSettings: "'FILL' 1"}}>bolt</span>
+              <p className="text-text-secondary text-xs font-medium uppercase tracking-wider">XP</p>
             </div>
-            <p className="text-2xl font-bold leading-none z-10">{user.gems}</p>
+            <p className="text-2xl font-bold leading-none z-10">{user.xp}</p>
           </div>
         </section>
 
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-[22px] font-bold tracking-tight">Tus Módulos</h2>
-            <span className="text-xs font-medium text-primary cursor-pointer hover:underline">Ver mapa completo</span>
           </div>
 
           {/* Module 1 Card */}
@@ -66,7 +68,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, navigate }) => {
             className="group relative flex flex-col rounded-2xl bg-surface-dark border border-white/5 shadow-lg overflow-hidden transition-transform transform active:scale-[0.98] cursor-pointer"
           >
             <div className="absolute top-0 left-0 w-full h-1 bg-surface-highlight z-20">
-              <div className="h-full bg-primary w-[85%] shadow-[0_0_10px_rgba(19,236,91,0.5)]"></div>
+              <div className={`h-full bg-primary ${isModule1Complete ? 'w-full' : 'w-[45%]'} shadow-[0_0_10px_rgba(19,236,91,0.5)] transition-all duration-700`}></div>
             </div>
             <div className="relative h-40 w-full overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-t from-surface-dark to-transparent z-10"></div>
@@ -75,7 +77,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, navigate }) => {
                 style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCLG8qPIYP_ya2vMj8vxIOWlPbcwrPFMtU4UxrBpleKvUeHisxztZ24lPEPiZ6aqW3vwDxwbc_BzufmNWkKUf26aUHN5XzQuTWLRXVW1fXbn9eRKTNnwFfp-WEPev2YjnkDUksEizkgguvfzDwBTVAmskvENoNSq_usYV55RTHYhHw-2b6HYETWqyD7iTFmMz3mnxJTJ_-Cpp3KMLroi9h0_KGh39SUfLaxWwoAG1MJ2Zt9ua7RAp__1utSKyATgkhER8Fv5Ii371g")'}}
               ></div>
               <div className="absolute top-4 right-4 z-20 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-                <span className="text-xs font-bold text-primary">85% Completado</span>
+                <span className="text-xs font-bold text-primary">{isModule1Complete ? '100%' : '45%'} Completado</span>
               </div>
             </div>
             <div className="p-5 flex flex-col gap-3">
@@ -85,53 +87,40 @@ const Dashboard: React.FC<DashboardProps> = ({ user, navigate }) => {
               </div>
               <button className="mt-2 w-full flex items-center justify-center gap-2 rounded-xl h-12 bg-primary hover:bg-primary-dark text-background-dark text-base font-bold shadow-[0_4px_14px_rgba(19,236,91,0.4)] transition-all">
                 <span className="material-symbols-outlined text-[20px]" style={{fontVariationSettings: "'FILL' 1"}}>play_arrow</span>
-                Continuar
+                {isModule1Complete ? 'Repasar' : 'Continuar'}
               </button>
             </div>
           </div>
 
-          {/* Locked Module 2 */}
-          <div className="group relative flex flex-col rounded-2xl bg-surface-dark border border-white/5 shadow-md overflow-hidden opacity-90 cursor-not-allowed">
+          {/* Module 2 */}
+          <div 
+            onClick={() => isModule1Complete && navigate(Screen.ModuleLessons)}
+            className={`group relative flex flex-col rounded-2xl bg-surface-dark border border-white/5 shadow-md overflow-hidden transition-all duration-300 ${!isModule1Complete ? 'opacity-70 grayscale cursor-not-allowed' : 'cursor-pointer hover:border-primary/30'}`}
+          >
             <div className="relative h-32 w-full overflow-hidden">
-              <div className="absolute inset-0 bg-background-dark/60 z-10 backdrop-grayscale-[0.5] flex items-center justify-center">
-                <div className="bg-black/40 backdrop-blur-sm p-3 rounded-full border border-white/10 shadow-lg">
-                  <span className="material-symbols-outlined text-white/70 text-[24px]">lock</span>
+              {!isModule1Complete && (
+                <div className="absolute inset-0 bg-background-dark/60 z-30 backdrop-blur-[1px] flex items-center justify-center">
+                   <div className="flex flex-col items-center gap-2">
+                     <div className="bg-black/60 p-3 rounded-full border border-white/10">
+                       <span className="material-symbols-outlined text-white text-[24px]">lock</span>
+                     </div>
+                     <span className="text-[10px] font-bold text-white uppercase tracking-widest">Completa Módulo 1</span>
+                   </div>
                 </div>
-              </div>
+              )}
               <div 
                 className="w-full h-full bg-center bg-cover" 
                 style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAaq_aFnQXOXg_4y6CLLL3Y7sxcaMWIAt1lvfO2I3Va9eSHboQ_-QkHKoOJ38rMsz_6eMKDBgjW8kbHQvZifJE6qF2tdAgDZ9Cy9lycf-vj1oDvODQMEDRpDuK9TrtFkcYMVkL0Mb8MGegUYr9ygbbuIPuiKiqeOKo9nldJuCeb2_Dn8WD3HalHh8kNp8H02yRwuoViKVuB-LLj-RLStPA8nEXUPI9QLHp2Oh9SZXa-bMYKvK-LXFMlzDQe85B_i9BzhTL89LkLD0o")'}}
               ></div>
             </div>
             <div className="p-5 flex flex-col gap-1">
-              <h3 className="text-lg font-bold text-white/80 leading-tight">Módulo 2: Congruencia, semejanza y proporcionalidad</h3>
+              <h3 className="text-lg font-bold text-white/80 leading-tight">Módulo 2: Congruencia y Semejanza</h3>
               <p className="text-text-secondary/70 text-sm">Comprende cómo comparar figuras y sus relaciones proporcionales.</p>
-              <div className="mt-3 flex items-center justify-between text-xs font-medium text-text-secondary/60">
-                <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">school</span> Nivel 5 requerido</span>
-                <span>0%</span>
-              </div>
-              <div className="mt-1 h-1.5 w-full bg-surface-highlight rounded-full overflow-hidden">
-                <div className="h-full bg-white/10 w-0"></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Locked Module 3 */}
-          <div className="group relative flex flex-col rounded-2xl bg-surface-dark border border-white/5 shadow-md overflow-hidden opacity-70 grayscale transition-all hover:grayscale-0 hover:opacity-100 cursor-not-allowed">
-            <div className="relative h-32 w-full overflow-hidden">
-              <div className="absolute inset-0 bg-background-dark/70 z-10 flex items-center justify-center">
-                <div className="bg-black/40 backdrop-blur-sm p-3 rounded-full border border-white/10">
-                  <span className="material-symbols-outlined text-white/50 text-[24px]">lock</span>
-                </div>
-              </div>
-              <div 
-                className="w-full h-full bg-center bg-cover" 
-                style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuD01ML5QqrYy3pfCyOfNx5ltGzSjcDWP9Dz6EyS7ZZVAA-pDTep9_IP7S5vkVXWJC8DTkXnTnizdMdh8Vu8X6FGF9FiAyWpYpQDDMkj7Jt3ZMqc9OWOE30v23eJ0R0a8ryvkkmXVVgZW9j5dWzzd69SAaWbKia-00__aNSlzI2n5m4rYPHM4l2zMGz5V2b-vSN9X2AsAoryRGnbs4_MHkoywwytAy4SByiGt8OxzSo8TiwSDUmiPtbLA9i6xVO5S1cKMGFk_HURsrQ")'}}
-              ></div>
-            </div>
-            <div className="p-5 flex flex-col gap-1">
-              <h3 className="text-lg font-bold text-white/60 leading-tight">Módulo 3: Transformaciones geométricas</h3>
-              <p className="text-text-secondary/50 text-sm">Explora rotaciones, traslaciones y simetrías en el plano.</p>
+              {isModule1Complete && (
+                 <button className="mt-3 w-full py-2 bg-primary/10 border border-primary/20 text-primary rounded-lg text-xs font-bold hover:bg-primary hover:text-black transition-all">
+                    COMENZAR MÓDULO 2
+                 </button>
+              )}
             </div>
           </div>
         </section>
@@ -150,7 +139,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, navigate }) => {
             </button>
           </li>
           <li className="flex-1">
-            <button className="flex flex-col items-center justify-center w-full gap-1 p-2 text-text-secondary hover:text-white transition-colors">
+            <button 
+              onClick={() => navigate(Screen.Ranking)}
+              className="flex flex-col items-center justify-center w-full gap-1 p-2 text-text-secondary hover:text-white transition-colors"
+            >
               <span className="material-symbols-outlined text-[26px]">leaderboard</span>
               <span className="text-[10px] font-medium">Ranking</span>
             </button>
@@ -158,7 +150,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, navigate }) => {
           <li className="flex-1">
             <div className="relative -top-6">
               <button 
-                onClick={() => navigate(Screen.LessonObserve)}
+                onClick={() => navigate(Screen.ModuleLessons)}
                 className="flex items-center justify-center h-14 w-14 rounded-full bg-primary text-background-dark shadow-[0_0_15px_rgba(19,236,91,0.5)] border-4 border-background-dark transform transition-transform active:scale-95"
               >
                 <span className="material-symbols-outlined text-[32px] filled" style={{fontVariationSettings: "'FILL' 1"}}>play_arrow</span>
